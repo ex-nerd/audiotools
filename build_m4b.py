@@ -71,6 +71,7 @@ def encode(title, burn, meta):
     chapterfile = '{0}.chapters.txt'.format(title)
     outfile = title + '.m4b'
     # Run mp4box
+    # Some versions (0.4.5 and below?) limit to 20 files per run
     numruns = (len(burn['tracks']) + 19) / 20
     for i in range(numruns):
         index = i * 20
