@@ -71,12 +71,17 @@ def encode(title, burn, meta):
     chapterfile = '{0}.chapters.txt'.format(title)
     outfile = title + '.m4b'
     # Run mp4box
-    call = ['MP4Box']
-    for tpath in burn['tracks']:
-        call += ['-cat', tpath]
-    call += ['-new', outfile]
-    #print call
-    subprocess.call(call)
+    numruns = (len(burn['tracks']) + 19) / 20
+    for i in range(numruns):
+        index = i * 20
+        call = ['MP4Box']
+        for tpath in burn['tracks'][index:index+20]:
+            call += ['-cat', tpath]
+        if i == 0:
+            call += ['-new']
+        call += [outfile]
+        #print call
+        subprocess.call(call)
     # Add the appropriate meta tags
     m = MP4(outfile)
     m[t4['genre']]    = ['Audiobook']
