@@ -121,6 +121,9 @@ if __name__ == '__main__':
     chapters   = ''
     num_tracks = 0;
     for file in files:
+        # Preload the file size (something about MP4() can cause issues with stat)
+        filesize = os.path.getsize(file) / (1024 * 1024)
+        # Load the m4a info
         m = MP4(file)
         # Title, for the chapter name
         #print file
@@ -177,7 +180,7 @@ if __name__ == '__main__':
         burn['chapters'] += '{0} {1}\n'.format(timestr(burn['tlen']), title)
         burn['tlen'] += m.info.length
         # Keep track of file size
-        burn['tsize'] += os.path.getsize(file) / (1024 * 1024)
+        burn['tsize'] += filesize
         # Add the file
         burn['tracks'].append(file)
         # Long enough to break out a chunk?
