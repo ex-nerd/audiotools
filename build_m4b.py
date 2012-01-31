@@ -19,7 +19,6 @@ max_size = None
 
 import os, sys, re
 import subprocess
-import unicodedata
 from mutagen.mp4 import MP4
 
 t4 = {
@@ -55,7 +54,7 @@ t4 = {
     }
 
 def newburn():
-    return { 'chapters': '', 'tracks': [], 'tlen': 0.0, 'tsize': 0.0, 'disknum': 0, 'tmin': None, 'tmax': None }
+    return { 'chapters': u'', 'tracks': [], 'tlen': 0.0, 'tsize': 0.0, 'disknum': 0, 'tmin': None, 'tmax': None }
 
 def timestr(secs):
     (secs, ms) = str(secs).split('.')
@@ -77,10 +76,10 @@ def encode(title, burn, meta):
         index = i * 20
         call = ['MP4Box']
         for tpath in burn['tracks'][index:index+20]:
-            call += ['-cat', tpath]
+            call += ['-cat', str(tpath)]
         if i == 0:
             call += ['-new']
-        call += [outfile]
+        call += [str(outfile)]
         #print call
         subprocess.call(call)
     # Add the appropriate meta tags
@@ -93,8 +92,8 @@ def encode(title, burn, meta):
     #'numtracks': numtracks,
     m.save()
     # Create the chapters file, chapterize, cleanup
-    with open(chapterfile , 'w') as file:
-        file.write(burn['chapters'])
+    with open(chapterfile, 'w') as file:
+        file.write(burn['chapters'].encode('utf-8'))
     subprocess.call(['mp4chaps', '--import', outfile])
     os.unlink(chapterfile)
     # Add a cover image?
@@ -143,7 +142,7 @@ if __name__ == '__main__':
             if len(m['covr'][0]) > 0:
                 with open(cover_name, 'wb') as file:
                     file.write(m['covr'][0])
-        if os.path.exists(cover_name):
+        if os.path.exists(cover_name) and not os.path.exists('cover.jpg'):
             burn['cover'] = cover_name
         else:
             burn['cover'] = 'cover.jpg'
@@ -177,7 +176,8 @@ if __name__ == '__main__':
             else:
                 meta[key] = track[key]
         # Length and chapter info
-        burn['chapters'] += '{0} {1}\n'.format(timestr(burn['tlen']), title)
+        #print title
+        burn['chapters'] += u'{0} {1}\n'.format(timestr(burn['tlen']), title)
         burn['tlen'] += m.info.length
         # Keep track of file size
         burn['tsize'] += filesize
@@ -194,13 +194,13 @@ if __name__ == '__main__':
         if len(burns) == 1:
             title = meta['album']
         elif group_by_disk and meta['numdisks']:
-            title = "{0} - Disk {1} of {2}".format(
+            title = u"{0} - Disk {1} of {2}".format(
                 meta['album'],
                 str(burn['disknum']).zfill(len(str(meta['numdisks']))),
                 meta['numdisks']
                 )
         else:
-            title = "{0} - {1}-{2} of {3}".format(
+            title = u"{0} - {1}-{2} of {3}".format(
                 meta['album'],
                 str(burn['tmin']).zfill(max(2,len(str(num_tracks)))),
                 str(burn['tmax']).zfill(max(2,len(str(num_tracks)))),
