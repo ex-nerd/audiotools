@@ -61,7 +61,7 @@ if __name__ == '__main__':
         # Grouping in the filename
         groupnum = None
         match = re.search(r'^([^\-]+?)\s+(\d+)\s-\s', file)
-        if match.group(2):
+        if match and match.group(2):
             groupnum = match.group(2)
         # Grouping?
         grouping = m.get(t4['grouping'], [''])[0].strip()
@@ -76,5 +76,9 @@ if __name__ == '__main__':
             print file
             print '  ' + ', '.join(changed)
             m.save()
+        # Cover art?
+        if os.path.exists(file[:-4] + '.jpg'):
+            subprocess.call(['mp4art', '--remove', file])
+            subprocess.call(['mp4art', '--add', file[:-4] + '.jpg', file])
         # chmod (os.chmod() feels messy)
         subprocess.call(['chmod', '644', file])
