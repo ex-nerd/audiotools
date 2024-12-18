@@ -87,6 +87,8 @@ def pick_file(*paths) -> str:
 
 
 def encode(title, burn, meta):
+    if not safe_title:
+        raise Exception("Couldn't determine new filename. Do your source files contain 'album' tags?")
     safe_title = title.replace("/", "-")
     chapterfile = f"{safe_title}.chapters.txt"
     outfile = "{0}.m4b".format(safe_title)

@@ -88,28 +88,31 @@ def main():
         composer = m.get(t4["composer"], [""])[0].strip()
         if composer:
             composer = re.sub(r'^(Read|Narrated) by\b *', 'read by ', composer, re.IGNORECASE)
+            composer = re.sub(r'\s+', ' ', composer).strip()
             if not composer.startswith('read by '):
                 composer = f'read by {composer}'
             if composer != m.get(t4["composer"], [""])[0]:
                 change["composer"] = composer.strip()
         elif len(split_artist) == 2:
-            change["artist"] = split_artist[0]
-            change["composer"] = f'read by {split_artist[1]}'
+            change["artist"] = split_artist[0].strip()
+            change["composer"] = f'read by {split_artist[1]}'.strip()
         # Comments
         # pprint({"comments": m.get(t4["comment"], [])})
         comments = m.get(t4["comment"], [""])[0].strip()
         if comments:
             comments = re.sub(r'<.+?>', ' ', comments)
-            comments = re.sub(r'\s+', ' ', comments)
             comments = re.sub(r'[“”]', '"', comments)
             comments = re.sub(r'[‘’]', '\'', comments)
-            comments = re.sub(r'\bb estselling\b', 'bestselling', comments)
+            comments = re.sub(r'\bb estselling\b', 'bestselling', comments, re.IGNORECASE)
+            comments = re.sub(r'\(Unabridged\)', '', comments, re.IGNORECASE)
             comments = re.sub(r'\.\.+$', '…', comments)
             comments = re.sub(r' *\w+$', '…', comments)
+            comments = re.sub(r'\\n', ' ', comments)
             comments = re.sub(r'[, ]+…$', '…', comments)
             comments = re.sub(r'(\.["\']?)\W*?…$', r'\g<1>', comments)
+            comments = re.sub(r'\s+', ' ', comments).strip()
             if comments != m.get(t4["comment"], [""])[0]:
-                change["comment"] = comments.strip()
+                change["comment"] = comments
         # Grouping?
         if groupnum:
             grouping = m.get(t4["grouping"], [""])[0].strip()
@@ -121,6 +124,9 @@ def main():
                 sortorder = "{0} {1} - {2}".format(
                     grouping, groupnum, m[t4["title"]][0].strip()
                 )
+                sortorder = re.sub(r'\(Unabridged\)', '', sortorder, re.IGNORECASE)
+                sortorder = sortorder.strip()
+
                 if m.get(t4["albumsortorder"], [""])[0] != sortorder:
                     change["albumsortorder"] = sortorder
                 if m.get(t4["titlesortorder"], [""])[0] != sortorder:
